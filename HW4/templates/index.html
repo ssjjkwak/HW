@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Webpage Title -->
+    <title>나홀로 쇼핑몰</title>
+
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <!-- 구글폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+        * {
+            font-family: 'Jua', sans-serif;
+
+        }
+
+        .wrap {
+            width: 500px;
+            margin: 40px auto;
+
+        }
+
+        .img {
+            background-image: url('https://www.poom.co.kr/Upload2/Product/201809/1806281069_detail1.jpg');
+            background-size: cover;
+            background-position: center;
+            width: 500px;
+            height: 300px;
+        }
+
+        .info {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1, h5 {
+            display: inline;
+        }
+
+        .order {
+            text-align: center;
+        }
+
+
+        .input-group-text {
+            color: white;
+            background-color: black;
+        }
+
+        #exChange {
+            color: blue
+        }
+
+
+    </style>
+
+    <script>
+        function order(){
+            let name = $('#order-name').val();
+            let count = $('#order-count').val();
+            let address = $('#order-address').val();
+            let phone = $('#order-phone').val();
+
+            if (name === '') {
+                alert('이름을 입력주세요!')
+                $('#order-name').focus()
+
+            } else if (count === '') {
+                alert('수량을 입력해주세요!')
+                $('#order-count').focus()
+
+            } else if (address === '') {
+                alert('주소를 입력해주세요!')
+                $('#order-phone').focus()
+
+            } else if (!check(phone)) {
+                alert('휴대폰 양식을 맞춰주시기 바랍니다!(-포함)')
+
+            } else
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {name_give: name, count_give: count, address_give: address, phone_give: phone},
+                    success: function (response) {
+                        if (response["result"] === "success") {
+                            alert('주문이 완료되었습니다!');
+                            window.location.reload()
+                        }
+                    }
+                })
+
+        }
+
+
+        function check(p) {
+            let regExp = /^\d{3}-\d{3,4}-\d{4}$/;
+            return regExp.test(p);
+
+        }
+
+
+        function showOrders() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    if (response['result'] === 'success') {
+                        let orders = response['orders'];
+                        for (let i = 0; i < orders.length; i++) {
+                            makeOrderRow(orders[i]['name'], orders[i]['count'], orders[i]['address'], orders[i]['phone'])
+                        }
+                    } else {
+                        alert('error!')
+                    }
+                }
+            })
+        }
+
+        function makeOrderRow(name, count, address, phone) {
+            let tempHtml = `<tr>\
+                            <td>${name}</td>
+                            <td>${count}</td>
+                            <td>${address}</td>
+                            <td>${phone}</td>
+                            </tr>`;
+
+            $('#orders-box').append(tempHtml)
+        }
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let rate = response[1]['rate'];
+                    $('#exChange').append(rate);
+                }
+
+            })
+        });
+
+
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">승진's 쇼핑몰</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">장바구니 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">고객센터</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    상품
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#">가정용 디퓨저</a>
+                    <a class="dropdown-item" href="#">차량용 디퓨저</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">기타 제품</a>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">설정</a>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
+        </form>
+    </div>
+</nav>
+<div class="wrap">
+    <div class="img"></div>
+    <div class="info">
+        <h1>차량용 디퓨저를 팝니다.</h1>
+        <br>
+        <hr>
+        <h5>가격 : 8,000원/개</h5>
+        <br>
+        <hr>
+        <h5 id="exChange" onload="ready()">환율 : </h5> 원/$
+        <br>
+        <hr>
+        <p>차 안에 작게 걸어놓을 수 있는 귀여운 방향제예요!
+            귀여운 캐릭터의 얼굴이 그려져있어 시선을 끈답니다.
+            상큼한 피치 향으로 차안을 향긋하게 바꿔보세요~</p>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주문자 이름</span>
+            </div>
+            <input type="text" class="form-control" id="order-name">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text">수량</label>
+            </div>
+            <select class="custom-select" id="order-count">
+                <option selected value=""> -- 수량을 선택하세요 --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주소</span>
+            </div>
+            <input type="text" class="form-control" id="order-address">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">전화번호</span>
+            </div>
+            <input type="text" class="form-control" id="order-phone">
+        </div>
+        <div class="order">
+            <button type="button" class="btn btn-dark" onclick="order()">주문하기</button>
+        </div>
+        <div id="orders-box">
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
